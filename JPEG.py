@@ -6,9 +6,9 @@ import itertools
 import math
 
 class JPEG:
-    def __init__(self):
-        self.block_size = 8
-        self.q_matrix = np.array([[16, 11, 10, 16, 24, 40, 51, 61], 
+    def __init__(self, block_size = 8, num_coeff = 4):
+        self.block_size = block_size
+        q_matrix = np.array([[16, 11, 10, 16, 24, 40, 51, 61], 
                                 [12, 12, 14, 19, 26, 58, 60, 55],
                                 [14, 13, 16, 24, 40, 57, 69, 56],
                                 [14, 17, 22, 29, 51, 87, 80, 62],
@@ -16,7 +16,12 @@ class JPEG:
                                 [24, 35, 55, 64, 81, 104, 113, 92],
                                 [49, 64, 78, 87, 103, 121, 120, 101],
                                 [72, 92, 95, 98, 112, 100, 103, 99]])
-        self.num_coeff = 32
+        scaling_factor = block_size/8
+        print(scaling_factor)
+        scaled_q_matrix = cv2.resize(q_matrix.astype('float32'), None, fx=scaling_factor, fy=scaling_factor, interpolation = cv2.INTER_CUBIC)
+        self.q_matrix = scaled_q_matrix.astype('int32')
+        print(self.q_matrix)
+        self.num_coeff = num_coeff
         
     def encoder(self, image):
         """Encode the image using JPEG

@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 if __name__=='__main__':
-    jpeg = JPEG()
+    jpeg = JPEG(block_size=8, num_coeff=64)
     img = Image.open('./test/kodim01.png')
     # print(type(np.asarray(img)))
     # cv2.imshow('ff',img)
