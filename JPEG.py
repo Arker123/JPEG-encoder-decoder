@@ -7,7 +7,9 @@ import math
 import sys
 
 class JPEG:
+    """Class to encode and decode an image using JPEG"""
     def __init__(self, image, block_size = 8, num_coeff = None, grayScale=False, Qmatrix=None):
+        """Initialize the class"""
         self.image = image
         self.block_size = block_size
         q_matrix = np.array([[16, 11, 10, 16, 24, 40, 51, 61], 
@@ -25,7 +27,7 @@ class JPEG:
             self.q_matrix = scaled_q_matrix.astype('int32')
         else:
             self.q_matrix = Qmatrix
-        # print(self.q_matrix)
+
         self.num_coeff = num_coeff
         self.copy_img = image
 
@@ -37,7 +39,8 @@ class JPEG:
                 sys.exit(1)
         
     def encoder(self):
-        """Encode the image using JPEG
+        """
+        Encode the image using JPEG
         :return: The encoded image
         """
         image = self.image
@@ -49,16 +52,11 @@ class JPEG:
 
         new_height = new_height - self.image.size[1]
         new_width = new_width - self.image.size[0]
-        # print(new_width, new_height)
 
         if self.grayScale:
             img = np.pad(nparray, ((0,new_height),(0,new_width)), mode='constant') 
         else:
             r,g,b = cv2.split(nparray)
-
-            # print(r)
-
-            # print(nparray)
             
             r = np.pad(r, ((0,new_height),(0,new_width)), mode='constant')  
             g = np.pad(g, ((0,new_height),(0,new_width)), mode='constant')  
@@ -66,48 +64,9 @@ class JPEG:
             
             img = cv2.merge((r,g,b))
 
-        # print(img.shape)
-
         nparray = img
 
-        # img = Image.fromarray(img, "RGB")
-        # img.save('out.jpg')
-
         self.shape = nparray.shape
-
-        # print(nparray.shape)
-
-
-        # modify shape if not divisible by block size
-
-
-        
-
-        # canvas = np.zeros((int(new_width), int(new_height), 3))
-        # print(canvas.shape, self.image.size, self.image.size)
-        # canvas[:self.image.size[0], :self.image.size[1], :] = nparray
-
-        # self.image = canvas
-
-        # print(self.image.shape)
-        # img = Image.fromarray(self.image, "RGB")
-        # img.save('out.jpg')
-
-
-        # if self.image.size[0] % self.block_size != 0:
-        #     new_im = Image.new(self.image.mode, size = (self.image.size[0] + 100, self.image.size[1]))
-        #     new_im.putdata(self.image.getdata())
-        #     self.image = new_im
-
-        # if self.image.size[1] % self.block_size != 0:
-        #     new_im = Image.new(self.image.mode, size = (self.image.size[0], self.image.size[1] + 100))
-        #     new_im.putdata(self.image.getdata())
-        #     self.image = new_im
-
-        # # new_im = Image.new(self.image.mode, size = (self.image.size[0] , self.image.size[1] + 100))
-        # # new_im.putdata(self.image.getdata())
-        # print(self.image.size)
-        # new_im.save('out.jpg')
 
         if self.grayScale:
             image = np.float32(np.int32(nparray))
@@ -144,7 +103,10 @@ class JPEG:
             return self.encoded_image
 
     def decoder(self):
-        """Decode the image using JPEG"""
+        """
+        Decode the image using JPEG
+        :return: The decoded image
+        """
         encoded_input = self.encoded_image
         decoded_input = []
 
@@ -155,16 +117,11 @@ class JPEG:
         decoded_output = []
 
         for inp in decoded_input:
-            #Decode
             tmp_image = np.multiply(inp, self.q_matrix)
             tmp_image = np.float32(tmp_image)
             img1 = cv2.idct(tmp_image)
             decoded_output.append(img1)
 
-        # print(decoded_output[0:10])
-        # Stich images
-        # print(self.shape)
-        # return
         if self.grayScale:
             new_img = np.zeros((self.shape[0], self.shape[1]))
 
@@ -175,12 +132,7 @@ class JPEG:
                         
                         new_img[i:i+self.block_size, j:j+self.block_size] = decoded_output[ct]
                         ct+=1
-            #             tiles.append(tile)
-            #             c += 1
-                        
-            # print(new_img)
-            # print(np.int32(self.YUV2RGB(new_img)))
-            # self.decoded_image = np.int32(self.YUV2RGB(new_img))
+
             self.decoded_image = np.int32(new_img)
             return self.decoded_image
         else:
@@ -194,18 +146,18 @@ class JPEG:
                         
                         new_img[i:i+self.block_size, j:j+self.block_size, k] = decoded_output[ct]
                         ct+=1
-            #             tiles.append(tile)
-            #             c += 1
-                        
-            # print(new_img)
-            # print(np.int32(self.YUV2RGB(new_img)))
+
             self.decoded_image = np.int32(self.YUV2RGB(new_img))
             return self.decoded_image
-            # return np.int32(self.YUV2RGB(new_img))
 
-            # return decoded_output
     
     def split_into_blocks_colored(self, image, block_size):
+        """
+        Split the image into blocks of size block_size for color images
+        :param image: The image to be split
+        :param block_size: The size of the block
+        :return: A list of blocks
+        """
 
         tiles = []
 
@@ -219,6 +171,12 @@ class JPEG:
         return tiles
     
     def split_into_blocks_grayscale(self, image, block_size):
+        """
+        Split the image into blocks of size block_size for grayscale images
+        :param image: The image to be split
+        :param block_size: The size of the block
+        :return: A list of blocks
+        """
 
         tiles = []
 
@@ -230,6 +188,9 @@ class JPEG:
         return tiles
 
     def RGB2YUV(self, rgb_image):
+        """
+        Convert the image from RGB to YUV
+        """
         matrix = np.array([
             [0.29900, -0.147108,  0.614777],
             [0.58700, -0.288804, -0.514799],
@@ -240,6 +201,9 @@ class JPEG:
         return yuv_image
 
     def YUV2RGB(self, yuv_image):
+        """
+        Convert the image from YUV to RGB
+        """
         matrix = np.array([
             [1.000,  1.000, 1.000],
             [0.000, -0.394, 2.032],
@@ -251,26 +215,18 @@ class JPEG:
     
     def zig_zag_array(self, array, n=None):
         """
-        Return a new array where only the first n subelements in zig-zag order are kept.
-        The remaining elements are set to 0.
-        :param array: 2D array_like
-        :param n: Keep up to n subelements. Default: all subelements
-        :return: The new reduced array.
+        Zig-zag array
+        :param array: The array to be zig-zagged
+        :param n: The number of elements to be zig-zagged
+        :return: The zig-zagged array
         """
 
         shape = np.array(array).shape
-
-        assert len(shape) >= 2, "Array must be a 2D array_like"
 
         flag = False
         if n == None:
             flag = True
             n = self.block_size * self.block_size
-
-        # if n == None:
-        #     n = shape[0] * shape[1]
-        # assert 0 <= n <= shape[0] * shape[1], 'n must be the number of subelements to return'
-
         res = []
 
         (j, i) = (0, 0)
@@ -310,19 +266,15 @@ class JPEG:
         return res
     
     def reconstruct_zig_zag(self, array, n, block_size):
-        """Reconstruct"""
+        """
+        Reconstruct the zig-zagged array
+        :param array: The zig-zagged array
+        :param n: The number of elements to be reconstructed
+        :param block_size: The size of the block
+        :return: The reconstructed array
+        """
         
         result = np.int32(np.zeros([block_size, block_size]))
-        
-    #     print(result)
-
-    #     shape = np.array(array).shape
-
-    #     assert len(shape) >= 2, "Array must be a 2D array_like"
-
-    #     if n == None:
-    #         n = shape[0] * shape[1]
-    #     assert 0 <= n <= shape[0] * shape[1], 'n must be the number of subelements to return'
 
         
         shape = (block_size, block_size)
@@ -331,10 +283,8 @@ class JPEG:
             n = len(array)
 
         (j, i) = (0, 0)
-        direction = 'r'  # {'r': right, 'd': down, 'ur': up-right, 'dl': down-left}
+        direction = 'r'
         for subel_num in range(1, n + 1):
-    #         res.append(array[j][i])
-    #         print(array[subel_num - 1])
             result[j][i] = array[subel_num - 1]
             if direction == 'r':
                 i += 1
@@ -366,6 +316,9 @@ class JPEG:
         return result
     
     def getRMSE(self):
+        """
+        Calculate the RMSE
+        """
         inp = np.asarray(self.copy_img)
         out = self.decoded_image
         width = self.decoded_image.shape[0]
@@ -391,6 +344,9 @@ class JPEG:
         return rmse
     
     def get_MSE_and_PSNR(self):
+        """
+        Calculate the MSE and PSNR
+        """
 
         inp = np.asarray(self.copy_img)
         out = self.decoded_image
@@ -413,7 +369,11 @@ class JPEG:
                         mse += val
 
         mse = mse/(width*height)
-        psnr = 20*math.log10(255/math.sqrt(mse))
+        # print(mse)
+        if (mse == 0):
+            psnr = float('inf')
+        else:
+            psnr = 20*math.log10(255/math.sqrt(mse))
         return mse, psnr
     
     def write_encoded_data(self, file):
@@ -424,13 +384,27 @@ class JPEG:
 
     def display(self):
         """Display image"""
-        
-        # print(self.decoded_image)
-        # print(self.decoded_image.shape)
+
         if self.grayScale:
             plt.imshow(np.asarray(self.decoded_image), cmap='gray')
         else:
             plt.imshow(np.asarray(self.decoded_image))
         plt.show()
-# print(calculateRMSE(new_img, new_img_decoded, image.shape[0], image.shape[1]))
+    def save(self, file):
+        """Save image"""
+        if self.grayScale:
+            plt.imshow(np.asarray(self.decoded_image), cmap='gray')
+        else:
+            plt.imshow(np.asarray(self.decoded_image))
+        plt.savefig(file)
+
+    def getCompressionRatio(self):
+        """Compression Ratio"""
+        initial = self.copy_img.size[0]*self.copy_img.size[1]*8
+        l = 0
+        for i in self.encoded_image:
+            for j in i:
+                l += 1
+        final = l*8
+        return initial/final
         
