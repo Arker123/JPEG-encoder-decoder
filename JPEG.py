@@ -81,6 +81,13 @@ class JPEG:
 
             output_matrix = [self.zig_zag_array(block, self.num_coeff) for block in encoded_input]
 
+            # # print(output_matrix)
+            # maxi = 0
+            # for i in output_matrix:
+            #     if maxi < max(i):
+            #         maxi = max(i)
+            # print(maxi)
+            # # print(max(output_matrix))
             self.encoded_image = output_matrix
             return self.encoded_image
         else:
@@ -97,6 +104,13 @@ class JPEG:
                 encoded_input.append(out)
 
             output_matrix = [self.zig_zag_array(block, self.num_coeff) for block in encoded_input]
+
+            # # print(output_matrix)
+            # maxi = 0
+            # for i in output_matrix:
+            #     if maxi < max(i):
+            #         maxi = max(i)
+            # print(maxi)
 
             # print(output_matrix)
             self.encoded_image = output_matrix
@@ -319,6 +333,8 @@ class JPEG:
         """
         Calculate the RMSE
         """
+
+
         inp = np.asarray(self.copy_img)
         out = self.decoded_image
         width = self.decoded_image.shape[0]
@@ -338,6 +354,7 @@ class JPEG:
                         val = (abs(inp[k][i][j]-out[k][i][j]))
                         val = val**2
                         rmse += val
+            # rmse =math.sqrt(np.mean((inp-out)**2))
 
         rmse = rmse/(width*height)
         rmse = math.sqrt(rmse)
